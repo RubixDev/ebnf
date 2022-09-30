@@ -13,6 +13,20 @@ pub struct Configuration {
     pub min_terminals_percent_for_inline_definition_list: Percentage,
 }
 
+impl Default for Configuration {
+    fn default() -> Self {
+        Self {
+            line_width: 100,
+            newline_kind: NewlineKind::Unix,
+            quote_style: QuoteStyle::Single,
+            ignore_rule_comment_text: "ebnf-fmt ignore".to_string(),
+            mutliline_comment_indent: 2,
+            max_count_for_inline_definition_list: 3,
+            min_terminals_percent_for_inline_definition_list: Percentage(90),
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum QuoteStyle {
