@@ -8,7 +8,7 @@ pub use formatter::Formatter;
 mod tests {
     use ebnf_parser::{Lexer, Parser};
 
-    use crate::configuration::{Configuration, NewlineKind, QuoteStyle};
+    use crate::configuration::{Configuration, NewlineKind, Percentage, QuoteStyle};
 
     use super::*;
 
@@ -24,6 +24,8 @@ mod tests {
                 ignore_rule_comment_text: "ebnf-fmt ignore".to_string(),
                 quote_style: QuoteStyle::Single,
                 mutliline_comment_indent: 2,
+                max_count_for_inline_definition_list: 3,
+                min_terminals_percent_for_inline_definition_list: Percentage::new(90),
             },
         )
         .format();

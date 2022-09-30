@@ -11,9 +11,11 @@ enum Special {
     Newline,
     /// The current indent as spaces
     Indent,
+    /// A Newline followed by an Indent
+    NewlineIndent,
     /// The current indent as spaces minus the given length
     RestIndent(usize),
-    /// A MergingSpace or Newline + Indent depending on the current line length
+    /// A MergingSpace or NewlineIndent depending on the current line length
     SpaceOrNewline,
     /// A space when the previous character is not a space
     MergingSpace,
@@ -143,11 +145,14 @@ impl<'src, 'config> Formatter<'src, 'config> {
                 self.curr_line_len = 0;
             }
             Special::Indent => self.push_str(&" ".repeat(self.indent)),
+            Special::NewlineIndent => {
+                self.push_special(Special::Newline);
+                self.push_special(Special::Indent);
+            }
             Special::RestIndent(len) => self.push_str(&" ".repeat(self.indent - len)),
             Special::SpaceOrNewline => {
                 if self.curr_line_len >= self.config.line_width {
-                    self.push_special(Special::Newline);
-                    self.push_special(Special::Indent);
+                    self.push_special(Special::NewlineIndent);
                 } else {
                     self.push_special(Special::MergingSpace);
                 }
@@ -284,13 +289,45 @@ impl<'src, 'config> Formatter<'src, 'config> {
     }
 
     fn format_definitions_list(&mut self, node: Vec<SingleDefinition>) {
+        // Leave inline when len <= `max_count_for_inline_definition_list` or at least
+        // `min_terminals_percent_for_inline_definition_list`% of the definitions are a single TerminalString
+        let inline = node.len() <= self.config.max_count_for_inline_definition_list
+            || node
+                .iter()
+                .filter(|node| {
+                    matches!(
+                        node.terms.as_slice(),
+                        [SyntacticTerm {
+                            factor: SyntacticFactor {
+                                primary: SyntacticPrimary {
+                                    kind: SyntacticPrimaryKind::TerminalString(..),
+                                    ..
+                                },
+                                repetition: None,
+                                ..
+                            },
+                            exception: None,
+                            ..
+                        }]
+                    )
+                })
+                .count() as f64
+                >= (node.len() as f64)
+                    * self
+                        .config
+                        .min_terminals_percent_for_inline_definition_list
+                        .get_f64();
+
         let last = node.len().saturating_sub(1);
         for (index, node) in node.into_iter().enumerate() {
             self.format_single_definition(node);
             if index != last {
                 self.push_token(
                     TokenKind::Pipe,
-                    Some(Special::SpaceOrNewline.into()),
+                    Some(match inline {
+                        true => Special::SpaceOrNewline.into(),
+                        false => Special::NewlineIndent.into(),
+                    }),
                     Some(' '.into()),
                 );
             }
