@@ -13,7 +13,7 @@ enum Special {
     Indent,
     /// The current indent as spaces minus the given length
     RestIndent(usize),
-    /// A MerginSpace or Newline + Indent depending on the current line length
+    /// A MergingSpace or Newline + Indent depending on the current line length
     SpaceOrNewline,
     /// A space when the previous character is not a space
     MergingSpace,
