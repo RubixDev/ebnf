@@ -11,6 +11,7 @@ pub struct Configuration {
     pub mutliline_comment_indent: usize,
     pub max_count_for_inline_definition_list: usize,
     pub min_terminals_percent_for_inline_definition_list: Percentage,
+    pub max_child_len_for_inline_definition_list: usize,
 }
 
 impl Default for Configuration {
@@ -23,6 +24,7 @@ impl Default for Configuration {
             mutliline_comment_indent: 2,
             max_count_for_inline_definition_list: 3,
             min_terminals_percent_for_inline_definition_list: Percentage(90),
+            max_child_len_for_inline_definition_list: 2,
         }
     }
 }

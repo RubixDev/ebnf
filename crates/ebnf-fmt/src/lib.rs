@@ -8,7 +8,7 @@ pub use formatter::Formatter;
 mod tests {
     use ebnf_parser::{Lexer, Parser};
 
-    use crate::configuration::{Configuration, NewlineKind, Percentage, QuoteStyle};
+    use crate::configuration::Configuration;
 
     use super::*;
 
@@ -18,15 +18,7 @@ mod tests {
         let out = Formatter::new(
             Parser::new(Lexer::new(input)).parse().unwrap(),
             input,
-            &Configuration {
-                line_width: 100,
-                newline_kind: NewlineKind::Unix,
-                ignore_rule_comment_text: "ebnf-fmt ignore".to_string(),
-                quote_style: QuoteStyle::Single,
-                mutliline_comment_indent: 2,
-                max_count_for_inline_definition_list: 3,
-                min_terminals_percent_for_inline_definition_list: Percentage::new(90),
-            },
+            &Configuration::default(),
         )
         .format();
         println!("{out}")
