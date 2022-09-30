@@ -1,0 +1,61 @@
+letter = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G'
+       | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N'
+       | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U'
+       | 'V' | 'W' | 'X' | 'Y' | 'Z' | 'a' | 'b'
+       | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i'
+       | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p'
+       | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w'
+       | 'x' | 'y' | 'z' ;
+digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' ;
+(* The ISO 14977 standard only allows characters from the ISO/IEC 646:1991 character set *)
+character = ? any utf8 character ? ;
+
+repetition_symbol = '*' ;
+except_symbol = '-' ;
+concatenate_symbol = ',' ;
+definition_separator_symbol = '|' ;
+defining_symbol = '=' ;
+terminator_symbol = ';' ;
+first_quote_symbol = "'" ;
+second_quote_symbol = '"' ;
+start_comment_symbol = '(*' ;
+end_comment_symbol = '*)' ;
+start_group_symbol = '(' ;
+end_group_symbol = ')' ;
+start_option_symbol = '[' ;
+end_option_symbol = ']' ;
+start_repeat_symbol = '{' ;
+end_repeat_symbol = '}' ;
+special_sequence_symbol = '?' ;
+
+syntax = { syntax_rule }- ;
+syntax_rule = meta_identifier , defining_symbol , definitions_list , terminator_symbol ;
+definitions_list = single_definition , { definition_separator_symbol , single_definition } ;
+single_definition = syntactic_term , { concatenate_symbol , syntactic_term } ;
+syntactic_term = syntactic_factor , [ except_symbol , syntactic_exception ] ;
+syntactic_exception = syntactic_factor (* but only regular grammar *) ;
+syntactic_factor = [ integer , repetition_symbol ] , syntactic_primary ;
+integer = { digit }- ;
+syntactic_primary = optional_sequence
+                  | repeated_sequence
+                  | grouped_sequence
+                  | meta_identifier
+                  | terminal_string
+                  | special_sequence
+                  | empty_sequence ;
+optional_sequence = start_option_symbol , definitions_list , end_option_symbol ;
+repeated_sequence = start_repeat_symbol , definitions_list , end_repeat_symbol ;
+grouped_sequence = start_group_symbol , definitions_list , end_group_symbol ;
+meta_identifier = letter , { meta_identifier_character } ;
+(* The underscore is not part of the ISO 14977 standard *)
+meta_identifier_character = letter | digit | '_' ;
+terminal_string = first_quote_symbol , { first_terminal_character }- , first_quote_symbol
+                | second_quote_symbol , { second_terminal_character }- , second_quote_symbol ;
+first_terminal_character = character - first_quote_symbol ;
+second_terminal_character = character - second_quote_symbol ;
+special_sequence = special_sequence_symbol , { special_sequence_character } , special_sequence_symbol ;
+special_sequence_character = character - special_sequence_symbol ;
+empty_sequence = ;
+
+(* Comments are not part of the syntax tree *)
+comment = start_comment_symbol , { character } , end_comment_symbol ;
