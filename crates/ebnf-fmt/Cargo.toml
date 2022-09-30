@@ -1,0 +1,13 @@
+[package]
+name = "ebnf-fmt"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = []
+
+[dependencies]
+ebnf-parser = { version = "0.1.0", path = "../ebnf-parser" }
+serde = { version = "1.0.145", features = ["derive"], optional = true }
