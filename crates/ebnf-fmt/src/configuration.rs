@@ -5,7 +5,7 @@ pub struct Configuration {
     pub line_width: usize,
     pub newline_kind: NewlineKind,
     pub quote_style: QuoteStyle,
-    pub ignore_node_comment_text: String,
+    pub ignore_rule_comment_text: String,
     pub mutliline_comment_indent: usize,
 }
 

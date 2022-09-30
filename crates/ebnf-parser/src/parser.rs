@@ -74,8 +74,10 @@ impl<'src> Parser<'src> {
             self.curr_tok = self.lexer.next_token()?;
         }
         if !comments.is_empty() {
-            self.comments
-                .insert(self.tokens.len() + self.prev_tok.is_some() as usize, comments);
+            self.comments.insert(
+                self.tokens.len() + self.prev_tok.is_some() as usize,
+                comments,
+            );
         }
 
         mem::swap(&mut self.prev_span, &mut self.curr_span);
@@ -101,7 +103,10 @@ impl<'src> Parser<'src> {
                 self.curr_span,
                 format!("Expected '{kind}', was '{tok_kind}'").into(),
             )),
-            None => Err(SyntaxError::new(self.curr_span, format!("Expected '{kind}'").into())),
+            None => Err(SyntaxError::new(
+                self.curr_span,
+                format!("Expected '{kind}'").into(),
+            )),
         }
     }
 
@@ -133,7 +138,12 @@ impl<'src> Parser<'src> {
                 kind: TokenKind::Identifier(name),
                 ..
             }) => name,
-            _ => return Err(SyntaxError::new(self.curr_span, "Expected identifier".into())),
+            _ => {
+                return Err(SyntaxError::new(
+                    self.curr_span,
+                    "Expected identifier".into(),
+                ))
+            }
         };
         self.next()?;
 
@@ -221,16 +231,20 @@ impl<'src> Parser<'src> {
 
     fn syntactic_primary(&mut self) -> Result<SyntacticPrimary<'src>, SyntaxError> {
         let start = self.curr_span.start;
-        let kind = match self.curr_tok.as_ref().map_or(TokenKind::Semicolon, |tok| tok.kind) {
-            TokenKind::LBracket => {
-                SyntacticPrimaryKind::OptionalSequence(self.delimited_definitions_list(TokenKind::RBracket)?)
-            }
-            TokenKind::LBrace => {
-                SyntacticPrimaryKind::RepeatedSequence(self.delimited_definitions_list(TokenKind::RBrace)?)
-            }
-            TokenKind::LParen => {
-                SyntacticPrimaryKind::GroupedSequence(self.delimited_definitions_list(TokenKind::RParen)?)
-            }
+        let kind = match self
+            .curr_tok
+            .as_ref()
+            .map_or(TokenKind::Semicolon, |tok| tok.kind)
+        {
+            TokenKind::LBracket => SyntacticPrimaryKind::OptionalSequence(
+                self.delimited_definitions_list(TokenKind::RBracket)?,
+            ),
+            TokenKind::LBrace => SyntacticPrimaryKind::RepeatedSequence(
+                self.delimited_definitions_list(TokenKind::RBrace)?,
+            ),
+            TokenKind::LParen => SyntacticPrimaryKind::GroupedSequence(
+                self.delimited_definitions_list(TokenKind::RParen)?,
+            ),
             TokenKind::Identifier(name) => {
                 self.next()?;
                 SyntacticPrimaryKind::MetaIdentifier(name)

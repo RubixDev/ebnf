@@ -66,7 +66,10 @@ impl<'src> TryFrom<Token<'src>> for Comment<'src> {
 
     fn try_from(value: Token<'src>) -> Result<Self, Self::Error> {
         match value.kind {
-            TokenKind::Comment(text) => Ok(Comment { span: value.span, text }),
+            TokenKind::Comment(text) => Ok(Comment {
+                span: value.span,
+                text,
+            }),
             _ => Err("Comment node can only be constructed from Comment TokenKind"),
         }
     }

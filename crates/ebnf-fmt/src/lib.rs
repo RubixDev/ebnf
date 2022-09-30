@@ -21,7 +21,7 @@ mod tests {
             &Configuration {
                 line_width: 100,
                 newline_kind: NewlineKind::Unix,
-                ignore_node_comment_text: "ebnf-fmt ignore".to_string(),
+                ignore_rule_comment_text: "ebnf-fmt ignore".to_string(),
                 quote_style: QuoteStyle::Single,
                 mutliline_comment_indent: 2,
             },

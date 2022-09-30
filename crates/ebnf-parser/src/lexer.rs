@@ -109,7 +109,9 @@ impl<'src> Lexer<'src> {
         self.next();
         self.next();
         let content_start = self.index;
-        while self.curr_char.is_some() && !(self.curr_char == Some('*') && self.next_char == Some(')')) {
+        while self.curr_char.is_some()
+            && !(self.curr_char == Some('*') && self.next_char == Some(')'))
+        {
             self.next();
         }
         let content_end = self.index;
@@ -142,7 +144,11 @@ impl<'src> Lexer<'src> {
     }
 
     fn parse_special_seq(&mut self) -> Result<Token<'src>, SyntaxError> {
-        debug_assert!(self.curr_char == Some('?'), "Expected '?', was {:?}", self.curr_char,);
+        debug_assert!(
+            self.curr_char == Some('?'),
+            "Expected '?', was {:?}",
+            self.curr_char,
+        );
 
         let span_start = self.index;
         let content = self.delimeted_str(Some('?')).trim();
@@ -163,7 +169,10 @@ impl<'src> Lexer<'src> {
         let span_start = self.index;
         let content_start = self.index;
         self.next(); // first letter
-        while self.curr_char.map_or(false, |c| c.is_ascii_alphanumeric() || c == '_') {
+        while self
+            .curr_char
+            .map_or(false, |c| c.is_ascii_alphanumeric() || c == '_')
+        {
             self.next();
         }
         let content_end = self.index;
@@ -200,6 +209,9 @@ impl<'src> Lexer<'src> {
             }
         };
 
-        Ok(Token::new(TokenKind::Integer(num), Span::new(span_start, self.index)))
+        Ok(Token::new(
+            TokenKind::Integer(num),
+            Span::new(span_start, self.index),
+        ))
     }
 }

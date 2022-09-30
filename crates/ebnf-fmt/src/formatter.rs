@@ -56,10 +56,17 @@ pub struct Formatter<'src, 'config> {
     curr_tok: Option<Token<'src>>,
     tok_index: usize,
     comments: CommentMap<'src>,
+    /// Is true while ignoring formatting for a rule to prevent pushing to `output` while still
+    /// progressing `tokens`.
+    no_push: bool,
 }
 
 impl<'src, 'config> Formatter<'src, 'config> {
-    pub fn new(parse_result: ParseResult<'src>, text: &'src str, config: &'config Configuration) -> Self {
+    pub fn new(
+        parse_result: ParseResult<'src>,
+        text: &'src str,
+        config: &'config Configuration,
+    ) -> Self {
         Self {
             syntax: Some(parse_result.syntax),
             text,
@@ -73,6 +80,7 @@ impl<'src, 'config> Formatter<'src, 'config> {
             curr_tok: None,
             tok_index: usize::MAX,
             comments: parse_result.comments,
+            no_push: false,
         }
     }
 
@@ -103,22 +111,30 @@ impl<'src, 'config> Formatter<'src, 'config> {
     }
 
     fn push_char(&mut self, char: char) {
+        if self.no_push {
+            return;
+        }
         self.curr_line_len += 1;
         self.output.push(char);
     }
 
     fn push_str(&mut self, text: &str) {
+        if self.no_push {
+            return;
+        }
         self.curr_line_len += text.chars().count();
         self.output.push_str(text);
     }
 
     fn push_special(&mut self, special: Special) {
+        if self.no_push {
+            return;
+        }
         match special {
             Special::Newline => {
-                // TODO: need this?
                 // Trim trailing spaces
-                // self.output
-                //     .truncate(self.output.trim_end_matches(' ').len());
+                self.output
+                    .truncate(self.output.trim_end_matches(' ').len());
 
                 match self.config.newline_kind {
                     NewlineKind::Unix => self.output.push('\n'),
@@ -136,10 +152,11 @@ impl<'src, 'config> Formatter<'src, 'config> {
                     self.push_special(Special::MergingSpace);
                 }
             }
-            Special::MergingSpace => match self.output.as_bytes() {
-                [.., b' '] => {}
-                _ => self.push_char(' '),
-            },
+            Special::MergingSpace => {
+                if !self.output.ends_with(' ') {
+                    self.push_char(' ');
+                }
+            }
         }
     }
 
@@ -235,12 +252,35 @@ impl<'src, 'config> Formatter<'src, 'config> {
     }
 
     fn format_syntax_rule(&mut self, node: SyntaxRule) {
+        // Check for ignore comment
+        if let Some(comments) = self.comments.get(&self.tok_index) {
+            if comments
+                .iter()
+                .any(|comment| comment.text.contains(&self.config.ignore_rule_comment_text))
+            {
+                self.check_comments();
+                let raw_text = &self.text[node.span.start..node.span.end];
+                for line in raw_text.split('\n') {
+                    self.push_str(line.trim_end_matches('\r'));
+                    self.push_special(Special::Newline);
+                }
+                self.no_push = true;
+            }
+        }
+
+        // Format
         self.push_token(TokenKind::Identifier(node.name), None, None);
         self.push_special(Special::RestIndent(node.name.len()));
         self.push_token(TokenKind::Equal, None, Some(' '.into()));
         self.format_definitions_list(node.definitions);
-        self.push_token(TokenKind::Semicolon, Some(Special::MergingSpace.into()), None);
+        self.push_token(
+            TokenKind::Semicolon,
+            Some(Special::MergingSpace.into()),
+            None,
+        );
         self.push_special(Special::Newline);
+
+        self.no_push = false;
     }
 
     fn format_definitions_list(&mut self, node: Vec<SingleDefinition>) {
@@ -248,7 +288,11 @@ impl<'src, 'config> Formatter<'src, 'config> {
         for (index, node) in node.into_iter().enumerate() {
             self.format_single_definition(node);
             if index != last {
-                self.push_token(TokenKind::Pipe, Some(Special::SpaceOrNewline.into()), Some(' '.into()));
+                self.push_token(
+                    TokenKind::Pipe,
+                    Some(Special::SpaceOrNewline.into()),
+                    Some(' '.into()),
+                );
             }
         }
     }
@@ -258,7 +302,11 @@ impl<'src, 'config> Formatter<'src, 'config> {
         for (index, node) in node.terms.into_iter().enumerate() {
             self.format_syntactic_term(node);
             if index != last {
-                self.push_token(TokenKind::Comma, Some(Special::SpaceOrNewline.into()), Some(' '.into()));
+                self.push_token(
+                    TokenKind::Comma,
+                    Some(Special::SpaceOrNewline.into()),
+                    Some(' '.into()),
+                );
             }
         }
     }
@@ -307,30 +355,47 @@ impl<'src, 'config> Formatter<'src, 'config> {
     fn format_syntactic_factor(&mut self, node: SyntacticFactor) {
         if let Some(repetition) = node.repetition {
             self.push_token(TokenKind::Integer(repetition), None, None);
-            self.push_token(TokenKind::Star, Some(Special::MergingSpace.into()), Some(' '.into()));
+            self.push_token(
+                TokenKind::Star,
+                Some(Special::MergingSpace.into()),
+                Some(' '.into()),
+            );
         }
         self.format_syntactic_primary(node.primary);
     }
 
     fn format_syntactic_primary(&mut self, node: SyntacticPrimary) {
         match node.kind {
-            SyntacticPrimaryKind::OptionalSequence(node) => {
-                self.format_delimited_definitions_list(node, TokenKind::LBracket, TokenKind::RBracket)
-            }
+            SyntacticPrimaryKind::OptionalSequence(node) => self.format_delimited_definitions_list(
+                node,
+                TokenKind::LBracket,
+                TokenKind::RBracket,
+            ),
             SyntacticPrimaryKind::RepeatedSequence(node) => {
                 self.format_delimited_definitions_list(node, TokenKind::LBrace, TokenKind::RBrace)
             }
             SyntacticPrimaryKind::GroupedSequence(node) => {
                 self.format_delimited_definitions_list(node, TokenKind::LParen, TokenKind::RParen)
             }
-            SyntacticPrimaryKind::MetaIdentifier(name) => self.push_token(TokenKind::Identifier(name), None, None),
-            SyntacticPrimaryKind::TerminalString(text) => self.push_token(TokenKind::Terminal(text), None, None),
-            SyntacticPrimaryKind::SpecialSequence(text) => self.push_token(TokenKind::SpecialSeq(text), None, None),
+            SyntacticPrimaryKind::MetaIdentifier(name) => {
+                self.push_token(TokenKind::Identifier(name), None, None)
+            }
+            SyntacticPrimaryKind::TerminalString(text) => {
+                self.push_token(TokenKind::Terminal(text), None, None)
+            }
+            SyntacticPrimaryKind::SpecialSequence(text) => {
+                self.push_token(TokenKind::SpecialSeq(text), None, None)
+            }
             SyntacticPrimaryKind::EmptySequence => {}
         }
     }
 
-    fn format_delimited_definitions_list(&mut self, node: Vec<SingleDefinition>, open: TokenKind, close: TokenKind) {
+    fn format_delimited_definitions_list(
+        &mut self,
+        node: Vec<SingleDefinition>,
+        open: TokenKind,
+        close: TokenKind,
+    ) {
         let saved_indent = self.indent;
         self.indent = self.curr_line_len;
         self.push_token(open, None, Some(' '.into()));
@@ -367,7 +432,9 @@ impl<'src, 'config> Formatter<'src, 'config> {
 
                 // Trim any existing indent up to `current_comment_indent`
                 let mut line_start = 0;
-                while line_start < current_comment_indent && line.as_bytes().get(line_start) == Some(&b' ') {
+                while line_start < current_comment_indent
+                    && line.as_bytes().get(line_start) == Some(&b' ')
+                {
                     line_start += 1;
                 }
 
