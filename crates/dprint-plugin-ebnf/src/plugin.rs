@@ -27,7 +27,7 @@ impl SyncPluginHandler<Configuration> for EbnfPluginHandler {
             file_names: vec![],
             help_url: concat!(
                 env!("CARGO_PKG_REPOSITORY"),
-                "/crates/dprint-plugin-ebnf#readme"
+                "/tree/main/crates/dprint-plugin-ebnf#readme"
             )
             .to_string(),
             config_schema_url: "".to_string(),
