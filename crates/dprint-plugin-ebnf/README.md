@@ -1,4 +1,4 @@
-# dprint-plugin-stylua
+# dprint-plugin-ebnf
 
 Format EBNF grammar notations through [dprint](https://dprint.dev/).
 
