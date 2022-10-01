@@ -337,7 +337,7 @@ where
     }
 
     fn format_syntactic_term(&mut self, node: SyntacticTerm) {
-        let (prefix, suffix) = match (&node.factor, &node.exception) {
+        let prefix = match (&node.factor, &node.exception) {
             (
                 SyntacticFactor {
                     primary:
@@ -347,32 +347,14 @@ where
                         },
                     ..
                 },
-                Some(SyntacticFactor {
-                    primary:
-                        SyntacticPrimary {
-                            kind: SyntacticPrimaryKind::EmptySequence,
-                            ..
-                        },
-                    ..
-                }),
-            ) => (None, None),
-            (
-                _,
-                Some(SyntacticFactor {
-                    primary:
-                        SyntacticPrimary {
-                            kind: SyntacticPrimaryKind::EmptySequence,
-                            ..
-                        },
-                    ..
-                }),
-            ) => (Some(Special::MergingSpace.into()), None),
-            _ => (Some(Special::MergingSpace.into()), Some(' '.into())),
+                ..,
+            ) => None,
+            _ => Some(Special::MergingSpace.into()),
         };
 
         self.format_syntactic_factor(node.factor);
         if let Some(exception) = node.exception {
-            self.push_token(TokenKind::Dash, prefix, suffix);
+            self.push_token(TokenKind::Dash, prefix, Some(' '.into()));
             self.format_syntactic_factor(exception);
         }
     }
