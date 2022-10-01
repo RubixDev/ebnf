@@ -1,13 +1,36 @@
-mod configuration;
+pub mod configuration;
 mod formatter;
 
 pub use configuration::Configuration;
+use ebnf_parser::{error::SyntaxError, Lexer, Parser};
 pub use formatter::Formatter;
+
+pub fn format_code(text: &str, config: &Configuration) -> Result<String, SyntaxError> {
+    Ok(Formatter::new(
+        Parser::new(Lexer::new(text)).parse()?,
+        text,
+        config,
+        |text| text,
+    )
+    .format())
+}
+
+pub fn format_code_with_comment_formatter(
+    text: &str,
+    config: &Configuration,
+    comment_formatter: impl FnMut(String) -> String,
+) -> Result<String, SyntaxError> {
+    Ok(Formatter::new(
+        Parser::new(Lexer::new(text)).parse()?,
+        text,
+        config,
+        comment_formatter,
+    )
+    .format())
+}
 
 #[cfg(test)]
 mod tests {
-    use ebnf_parser::{Lexer, Parser};
-
     use crate::configuration::Configuration;
 
     use super::*;
@@ -15,12 +38,7 @@ mod tests {
     #[test]
     fn format() {
         let input = include_str!("../grammar.ebnf");
-        let out = Formatter::new(
-            Parser::new(Lexer::new(input)).parse().unwrap(),
-            input,
-            &Configuration::default(),
-        )
-        .format();
-        println!("{out}")
+        let output = format_code(input, &Configuration::default()).unwrap();
+        println!("{output}")
     }
 }

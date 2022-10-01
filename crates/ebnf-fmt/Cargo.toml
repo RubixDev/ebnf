@@ -7,7 +7,9 @@ edition = "2021"
 
 [features]
 default = []
+fromstr = ["strum"]
 
 [dependencies]
 ebnf-parser = { version = "0.1.0", path = "../ebnf-parser" }
 serde = { version = "1.0.145", features = ["derive"], optional = true }
+strum = { version = "0.24.1", features = ["derive"], optional = true }

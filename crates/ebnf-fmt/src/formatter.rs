@@ -45,9 +45,10 @@ impl From<Special> for PushKind<'_> {
     }
 }
 
-pub type CommentFormatter = Box<dyn Fn(String) -> String>;
-
-pub struct Formatter<'src, 'config> {
+pub struct Formatter<'src, 'config, CommentFormatter>
+where
+    CommentFormatter: FnMut(String) -> String,
+{
     syntax: Option<Syntax<'src>>,
     text: &'src str,
     config: &'config Configuration,
@@ -64,14 +65,18 @@ pub struct Formatter<'src, 'config> {
     /// progressing `tokens`.
     no_push: bool,
     /// A custom function to format the text inside multiline comments
-    comment_formatter: Option<CommentFormatter>,
+    comment_formatter: CommentFormatter,
 }
 
-impl<'src, 'config> Formatter<'src, 'config> {
+impl<'src, 'config, CommentFormatter> Formatter<'src, 'config, CommentFormatter>
+where
+    CommentFormatter: FnMut(String) -> String,
+{
     pub fn new(
         parse_result: ParseResult<'src>,
         text: &'src str,
         config: &'config Configuration,
+        comment_formatter: CommentFormatter,
     ) -> Self {
         Self {
             syntax: Some(parse_result.syntax),
@@ -87,15 +92,7 @@ impl<'src, 'config> Formatter<'src, 'config> {
             tok_index: usize::MAX,
             comments: parse_result.comments,
             no_push: false,
-            comment_formatter: None,
-        }
-    }
-
-    /// Set a custom function to format the text inside multiline comments
-    pub fn with_comment_formatter(self, comment_formatter: Option<CommentFormatter>) -> Self {
-        Self {
             comment_formatter,
-            ..self
         }
     }
 
@@ -462,24 +459,13 @@ impl<'src, 'config> Formatter<'src, 'config> {
                 trimmed_lines.push(line[line_start..].trim_end_matches('\r'));
             }
 
-            fn push_lines<'line>(
-                formatter: &mut Formatter,
-                lines: impl Iterator<Item = &'line str>,
-            ) {
-                for line in lines {
-                    if !line.trim().is_empty() {
-                        formatter.push_special(Special::Indent);
-                    }
-                    formatter.push_str(line.trim_end_matches('\r'));
-                    formatter.push_special(Special::Newline);
+            let formatted = (self.comment_formatter)(trimmed_lines.join("\n"));
+            for line in formatted.trim().split('\n') {
+                if !line.trim().is_empty() {
+                    self.push_special(Special::Indent);
                 }
-            }
-            match &self.comment_formatter {
-                Some(formatter) => {
-                    let formatted = formatter(trimmed_lines.join("\n"));
-                    push_lines(self, formatted.split('\n'));
-                }
-                None => push_lines(self, trimmed_lines.into_iter()),
+                self.push_str(line.trim_end_matches('\r'));
+                self.push_special(Special::Newline);
             }
 
             self.push_str("*)");

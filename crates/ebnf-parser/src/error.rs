@@ -1,8 +1,11 @@
 use std::borrow::Cow;
 
+use thiserror::Error;
+
 use crate::span::Span;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Error)]
+#[error("invalid syntax at {span}: {message}")]
 pub struct SyntaxError {
     pub span: Span,
     pub message: String,

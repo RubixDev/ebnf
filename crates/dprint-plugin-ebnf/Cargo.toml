@@ -1,0 +1,18 @@
+[package]
+name = "dprint-plugin-ebnf"
+version = "0.1.0"
+edition = "2021"
+repository = "https://github.com/RubixDev/ebnf"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["lib", "cdylib"]
+
+[dependencies]
+anyhow = "1.0.65"
+dprint-core = { version = "0.59.0", features = ["wasm"] }
+ebnf-fmt = { version = "0.1.0", path = "../ebnf-fmt", features = ["serde", "fromstr"] }
+heck-but-macros = "0.0.1"
+serde = { version = "1.0.145", features = ["derive"] }
+serde_json = "1.0.85"

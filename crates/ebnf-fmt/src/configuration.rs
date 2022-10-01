@@ -23,15 +23,17 @@ impl Default for Configuration {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "strum", derive(strum::EnumString))]
 pub enum QuoteStyle {
     Single,
     Double,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "strum", derive(strum::EnumString))]
 pub enum NewlineKind {
     Unix,
     Windows,

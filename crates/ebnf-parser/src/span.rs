@@ -1,4 +1,4 @@
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Span {
@@ -12,8 +12,14 @@ impl Span {
     }
 }
 
-impl Debug for Span {
+impl Display for Span {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}..{}", self.start, self.end)
+    }
+}
+
+impl Debug for Span {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self)
     }
 }
