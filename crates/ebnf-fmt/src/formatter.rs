@@ -45,6 +45,8 @@ impl From<Special> for PushKind<'_> {
     }
 }
 
+pub type CommentFormatter = Box<dyn Fn(String) -> String>;
+
 pub struct Formatter<'src, 'config> {
     syntax: Option<Syntax<'src>>,
     text: &'src str,
@@ -61,6 +63,8 @@ pub struct Formatter<'src, 'config> {
     /// Is true while ignoring formatting for a rule to prevent pushing to `output` while still
     /// progressing `tokens`.
     no_push: bool,
+    /// A custom function to format the text inside multiline comments
+    comment_formatter: Option<CommentFormatter>,
 }
 
 impl<'src, 'config> Formatter<'src, 'config> {
@@ -83,6 +87,15 @@ impl<'src, 'config> Formatter<'src, 'config> {
             tok_index: usize::MAX,
             comments: parse_result.comments,
             no_push: false,
+            comment_formatter: None,
+        }
+    }
+
+    /// Set a custom function to format the text inside multiline comments
+    pub fn with_comment_formatter(self, comment_formatter: Option<CommentFormatter>) -> Self {
+        Self {
+            comment_formatter,
+            ..self
         }
     }
 
@@ -285,6 +298,7 @@ impl<'src, 'config> Formatter<'src, 'config> {
         );
         self.push_special(Special::Newline);
 
+        // Allow further formatting
         self.no_push = false;
     }
 
@@ -435,12 +449,8 @@ impl<'src, 'config> Formatter<'src, 'config> {
                 .count();
             text = text.trim();
 
-            for mut line in text.split('\n') {
-                line = line.trim_end_matches('\r');
-                if !line.trim().is_empty() {
-                    self.push_special(Special::Indent);
-                }
-
+            let mut trimmed_lines = vec![];
+            for line in text.split('\n') {
                 // Trim any existing indent up to `current_comment_indent`
                 let mut line_start = 0;
                 while line_start < current_comment_indent
@@ -449,8 +459,27 @@ impl<'src, 'config> Formatter<'src, 'config> {
                     line_start += 1;
                 }
 
-                self.push_str(&line[line_start..]);
-                self.push_special(Special::Newline);
+                trimmed_lines.push(line[line_start..].trim_end_matches('\r'));
+            }
+
+            fn push_lines<'line>(
+                formatter: &mut Formatter,
+                lines: impl Iterator<Item = &'line str>,
+            ) {
+                for line in lines {
+                    if !line.trim().is_empty() {
+                        formatter.push_special(Special::Indent);
+                    }
+                    formatter.push_str(line.trim_end_matches('\r'));
+                    formatter.push_special(Special::Newline);
+                }
+            }
+            match &self.comment_formatter {
+                Some(formatter) => {
+                    let formatted = formatter(trimmed_lines.join("\n"));
+                    push_lines(self, formatted.split('\n'));
+                }
+                None => push_lines(self, trimmed_lines.into_iter()),
             }
 
             self.push_str("*)");
