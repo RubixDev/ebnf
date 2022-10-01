@@ -289,39 +289,8 @@ impl<'src, 'config> Formatter<'src, 'config> {
     }
 
     fn format_definitions_list(&mut self, node: Vec<SingleDefinition>) {
-        // Leave inline when every definition has at most `max_child_len_for_inline_definition_list` terms
-        // AND either len <= `max_count_for_inline_definition_list`
-        //     or at least `min_terminals_percent_for_inline_definition_list`% of the definitions
-        //     are a single TerminalString
-        let inline = node
-            .iter()
-            .all(|node| node.terms.len() <= self.config.max_child_len_for_inline_definition_list)
-            && (node.len() <= self.config.max_count_for_inline_definition_list
-                || node
-                    .iter()
-                    .filter(|node| {
-                        matches!(
-                            node.terms.as_slice(),
-                            [SyntacticTerm {
-                                factor: SyntacticFactor {
-                                    primary: SyntacticPrimary {
-                                        kind: SyntacticPrimaryKind::TerminalString(..),
-                                        ..
-                                    },
-                                    repetition: None,
-                                    ..
-                                },
-                                exception: None,
-                                ..
-                            }]
-                        )
-                    })
-                    .count() as f64
-                    >= (node.len() as f64)
-                        * self
-                            .config
-                            .min_terminals_percent_for_inline_definition_list
-                            .get_f64());
+        // Format inline when every definition has length 1
+        let inline = node.iter().all(|node| node.terms.len() == 1);
 
         let last = node.len().saturating_sub(1);
         for (index, node) in node.into_iter().enumerate() {
