@@ -247,9 +247,12 @@ where
                 .expect("Vector initialized with one element and never remove any element")
                 .push(node);
         }
-        for block in blocks {
+        let last = blocks.len().saturating_sub(1);
+        for (index, block) in blocks.into_iter().enumerate() {
             self.format_rule_block(block);
-            self.push_special(Special::Newline);
+            if index != last {
+                self.push_special(Special::Newline);
+            }
         }
         self.check_comments();
     }

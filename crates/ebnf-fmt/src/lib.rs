@@ -37,8 +37,9 @@ mod tests {
 
     #[test]
     fn format() {
-        let input = include_str!("../grammar.ebnf");
+        let input = include_str!("../../ebnf-parser/grammar.ebnf");
         let output = format_code(input, &Configuration::default()).unwrap();
-        println!("{output}")
+        println!("{output}");
+        assert!(!output.ends_with("\n\n"));
     }
 }
