@@ -1,2 +1,2 @@
 [workspace]
-members = ["crates/ebnf-parser", "crates/ebnf-fmt", "crates/dprint-plugin-ebnf", "crates/tree-sitter-ebnf"]
+members = ["crates/ebnf-parser", "crates/ebnf-fmt", "crates/dprint-plugin-ebnf"]
