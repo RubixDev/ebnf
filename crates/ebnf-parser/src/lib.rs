@@ -23,7 +23,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_ebnf() {
+    fn parse() {
         let text = include_str!("../grammar.ebnf");
         let res = Parser::new(Lexer::new(text)).parse();
         match res {
@@ -35,32 +35,6 @@ mod tests {
                         k,
                         v.iter().map(|c| c.text).collect::<Vec<_>>(),
                         res.tokens.get(k),
-                    );
-                }
-            }
-            Err(err) => eprintln!(
-                "\x1b[31m{}\x1b[1m{}\x1b[22m{}\x1b[0m\n{}",
-                &text[(err.span.start - 20)..(err.span.start)],
-                &text[err.span.start..err.span.end],
-                &text[(err.span.end)..(err.span.end + 20)],
-                err.message,
-            ),
-        }
-    }
-
-    #[test]
-    fn parse_hms() {
-        let text = include_str!("../../ebnf-fmt/grammar.ebnf");
-        let res = Parser::new(Lexer::new(text)).parse();
-        match res {
-            Ok(res) => {
-                println!("{:#?}", res.syntax);
-                for (k, v) in res.comments {
-                    println!(
-                        "{}: {:?} -- {:?}",
-                        k,
-                        v.iter().map(|c| c.text).collect::<Vec<_>>(),
-                        res.tokens[k],
                     );
                 }
             }
