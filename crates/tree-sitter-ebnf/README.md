@@ -27,7 +27,8 @@ list:
 require('nvim-treesitter.parsers').get_parser_configs().ebnf = {
     install_info = {
         url = 'https://github.com/RubixDev/ebnf.git',
-        files = { 'crates/tree-sitter-ebnf/src/parser.c' },
+        files = { 'src/parser.c' },
+        location = 'crates/tree-sitter-ebnf',
         branch = 'main',
     },
 }
