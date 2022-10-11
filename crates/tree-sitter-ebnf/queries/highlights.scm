@@ -1,33 +1,33 @@
 ;;;; Simple tokens ;;;;
-(terminal) @string @grammar.terminal
+(terminal) @string.grammar
 
-(special_sequence) @string.special @grammar.special
+(special_sequence) @string.special.grammar
 
 (integer) @number
 
 (comment) @comment.block
 
 ;;;; Identifiers ;;;;
-(identifier) @variable @grammar.nonterminal
+(identifier) @variable.grammar
 
 ; Allow different highlighting for specific casings
-((identifier) @grammar.nonterminal.pascal
- (#match? @grammar.nonterminal.pascal "^[A-Z]"))
+((identifier) @variable.grammar.pascal
+ (#match? @variable.grammar.pascal "^[A-Z]"))
 
-((identifier) @grammar.nonterminal.camel
- (#match? @grammar.nonterminal.camel "^[a-z]"))
+((identifier) @variable.grammar.camel
+ (#match? @variable.grammar.camel "^[a-z]"))
 
-((identifier) @grammar.nonterminal.upper
- (#match? @grammar.nonterminal.upper "^[A-Z][A-Z0-9_]+$"))
+((identifier) @variable.grammar.upper
+ (#match? @variable.grammar.upper "^[A-Z][A-Z0-9_]+$"))
 
-((identifier) @grammar.nonterminal.lower
- (#match? @grammar.nonterminal.lower "^[a-z][a-z0-9_]+$"))
+((identifier) @variable.grammar.lower
+ (#match? @variable.grammar.lower "^[a-z][a-z0-9_]+$"))
 
 ;;; Punctuation ;;;;
 [
  ";"
  ","
-] @punctuation.delimeter
+] @punctuation.delimiter
 
 [
  "|"

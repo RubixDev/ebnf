@@ -48,23 +48,23 @@ contents of [`queries/highlights.scm`](./queries/highlights.scm) to a file
 called `queries/ebnf/highlights.scm` in your Neovim runtime path (see
 `:help rtp`). I also recommend customizing these highlights:
 
-- `@grammar.terminal`: terminal symbols enclosed with `'` or `"`, falls back to
+- `@string.grammar`: terminal symbols enclosed with `'` or `"`, falls back to
   `@string`
-- `@grammar.special`: special sequences enclosed with `?`, falls back to
+- `@string.special.grammar`: special sequences enclosed with `?`, falls back to
   `@string.special`
-- `@grammar.nonterminal`: non-terminal symbols, i.e., identifiers, falls back to
+- `@variable.grammar`: non-terminal symbols, i.e., identifiers, falls back to
   `@variable`
-  - `@grammar.nonterminal.pascal`: non-terminal symbols in PascalCase
-  - `@grammar.nonterminal.camel`: non-terminal symbols in camelCase
-  - `@grammar.nonterminal.upper`: non-terminal symbols in UPPERCASE
-  - `@grammar.nonterminal.lower`: non-terminal symbols in lowercase
+  - `@variable.grammar.pascal`: non-terminal symbols in PascalCase
+  - `@variable.grammar.camel`: non-terminal symbols in camelCase
+  - `@variable.grammar.upper`: non-terminal symbols in UPPERCASE
+  - `@variable.grammar.lower`: non-terminal symbols in lowercase
 
 As an example, here is my personal configuration:
 
 ```lua
-vim.api.nvim_set_hl(0, '@grammar.special', { link = '@string.regex' })
-vim.api.nvim_set_hl(0, '@grammar.nonterminal.pascal', { link = '@type' })
-vim.api.nvim_set_hl(0, '@grammar.nonterminal.camel', { link = '@property' })
-vim.api.nvim_set_hl(0, '@grammar.nonterminal.upper', { link = '@constant' })
-vim.api.nvim_set_hl(0, '@grammar.nonterminal.lower', { link = '@parameter' })
+vim.api.nvim_set_hl(0, '@string.special.grammar', { link = '@string.regex' })
+vim.api.nvim_set_hl(0, '@variable.grammar.pascal', { link = '@type' })
+vim.api.nvim_set_hl(0, '@variable.grammar.camel', { link = '@property' })
+vim.api.nvim_set_hl(0, '@variable.grammar.upper', { link = '@constant' })
+vim.api.nvim_set_hl(0, '@variable.grammar.lower', { link = '@parameter' })
 ```
