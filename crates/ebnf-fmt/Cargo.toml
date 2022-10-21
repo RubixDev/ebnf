@@ -1,7 +1,12 @@
 [package]
 name = "ebnf-fmt"
 version = "0.1.0"
+categories = ["development-tools"]
 edition = "2021"
+keywords = ["formatter", "ebnf"]
+license = "GPL-3.0-only"
+repository = "https://github.com/RubixDev/ebnf"
+description = "A formatting library for the ISO 14977 EBNF notation"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

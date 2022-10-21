@@ -1,8 +1,12 @@
 [package]
 name = "dprint-plugin-ebnf"
 version = "0.1.1"
+categories = ["development-tools"]
 edition = "2021"
+keywords = ["formatting", "formatter", "ebnf", "dprint"]
+license = "GPL-3.0-only"
 repository = "https://github.com/RubixDev/ebnf"
+description = "A dprint plugin for formatting the ISO 14977 EBNF notation"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
