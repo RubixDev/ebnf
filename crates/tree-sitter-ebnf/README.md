@@ -44,10 +44,18 @@ vim.filetype.add { extension = { ebnf = 'ebnf' } }
 
 ### Highlighting
 
-If you want to use this parser for highlighting, you will also have to add the
-contents of [`queries/highlights.scm`](./queries/highlights.scm) to a file
-called `queries/ebnf/highlights.scm` in your Neovim runtime path (see
-`:help rtp`). I also recommend customizing these highlights:
+If you want to use this parser for highlighting, you will also have to add this
+repository as a plugin, for example for
+[packer.nvim](https://github.com/wbthomason/packer.nvim) add this:
+
+```lua
+use {
+    'RubixDev/ebnf',
+    rtp = 'crates/tree-sitter-ebnf',
+}
+```
+
+I also recommend customizing these highlights:
 
 - `@string.grammar`: terminal symbols enclosed with `'` or `"`, falls back to
   `@string`
