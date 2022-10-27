@@ -53,19 +53,19 @@ called `queries/ebnf/highlights.scm` in your Neovim runtime path (see
   `@string`
 - `@string.special.grammar`: special sequences enclosed with `?`, falls back to
   `@string.special`
-- `@variable.grammar`: non-terminal symbols, i.e., identifiers, falls back to
-  `@variable`
-  - `@variable.grammar.pascal`: non-terminal symbols in PascalCase
-  - `@variable.grammar.camel`: non-terminal symbols in camelCase
-  - `@variable.grammar.upper`: non-terminal symbols in UPPERCASE
-  - `@variable.grammar.lower`: non-terminal symbols in lowercase
+- `@symbol.grammar`: non-terminal symbols, i.e., identifiers, falls back to
+  `@symbol`
+  - `@symbol.grammar.pascal`: non-terminal symbols in PascalCase
+  - `@symbol.grammar.camel`: non-terminal symbols in camelCase
+  - `@symbol.grammar.upper`: non-terminal symbols in UPPERCASE
+  - `@symbol.grammar.lower`: non-terminal symbols in lowercase
 
 As an example, here is my personal configuration:
 
 ```lua
 vim.api.nvim_set_hl(0, '@string.special.grammar', { link = '@string.regex' })
-vim.api.nvim_set_hl(0, '@variable.grammar.pascal', { link = '@type' })
-vim.api.nvim_set_hl(0, '@variable.grammar.camel', { link = '@property' })
-vim.api.nvim_set_hl(0, '@variable.grammar.upper', { link = '@constant' })
-vim.api.nvim_set_hl(0, '@variable.grammar.lower', { link = '@parameter' })
+vim.api.nvim_set_hl(0, '@symbol.grammar.pascal', { link = '@type' })
+vim.api.nvim_set_hl(0, '@symbol.grammar.camel', { link = '@property' })
+vim.api.nvim_set_hl(0, '@symbol.grammar.upper', { link = '@constant' })
+vim.api.nvim_set_hl(0, '@symbol.grammar.lower', { link = '@parameter' })
 ```
