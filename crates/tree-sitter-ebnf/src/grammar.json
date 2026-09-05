@@ -1,4 +1,5 @@
 {
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/grammar.schema.json",
   "name": "ebnf",
   "rules": {
     "syntax": {
@@ -10,7 +11,7 @@
     },
     "terminal": {
       "type": "PATTERN",
-      "value": "'[^']*'|\"[^\"]*\""
+      "value": "'(?:[^'\\\\]|\\\\.)*'|\"(?:[^\"\\\\]|\\\\.)*\""
     },
     "identifier": {
       "type": "PATTERN",
@@ -339,6 +340,6 @@
   "precedences": [],
   "externals": [],
   "inline": [],
-  "supertypes": []
+  "supertypes": [],
+  "reserved": {}
 }
-

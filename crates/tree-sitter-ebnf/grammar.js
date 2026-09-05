@@ -9,7 +9,7 @@ module.exports = grammar({
     rules: {
         syntax: $ => repeat1($.syntax_rule),
 
-        terminal: $ => /'[^']*'|"[^"]*"/,
+        terminal: $ => /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/,
         identifier: $ => /[a-zA-Z][a-zA-Z0-9_]*/,
         integer: $ => /[0-9]+/,
         comment: $ => /\(\*[^*]*\*+(?:[^)*][^*]*\*+)*\)/,
